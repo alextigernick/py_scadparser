@@ -57,6 +57,10 @@ t_OR = "\|\|"
 
 t_FILENAME = r'<[a-zA-Z_0-9/\\\.-]*>'
 
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+    
 def t_comments1(t):
     r'(/\*(.|\n)*?\*/)'
     t.lexer.lineno += t.value.count("\n")
@@ -98,8 +102,11 @@ if __name__ == "__main__":
     lexer = lex.lex()
     lexer.filename = p.as_posix()
     lexer.input(''.join(f.readlines()))
+    start = False
     for tok in iter(lexer.token, None):
-        if tok.type == "MODULE":
+        if tok.type == "MODULE" or tok.type == "FUNCTION":
             print("")
-        print(repr(tok.type), repr(tok.value), end='')
+            print("")
+            print("")
+        print((repr(tok.type),repr(tok.value)), end='')
 

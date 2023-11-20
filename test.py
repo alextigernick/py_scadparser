@@ -1,0 +1,22 @@
+def is_undef(x):
+    return (x == None)
+def spur_gear(circ_pitch,teeth,thickness,pressure_angle,clearance,helical,interior,internal,slices,diam_pitch,mod,pitch,shaft_diam=0.0,hide=0.0,backlash=0.0,profile_shift="auto",herringbone=false,shorten=0.0,gear_spin=0.0,atype="pitch",anchor=CENTER,spin=0.0,orient=UP): 
+	dummy = ((print("In spur_gear(), the argument 'interior=' has been deprecated, and may be removed in the future.  Please use 'internal=' instead.")) if ((!is_undef(interior))) else (0.0))
+	internal = first_defined(list_stuff(tuple([,opt_expression_list(expression_list(expression_list(expression_list(internal),None,interior),None,false)),])))
+	circ_pitch = _inherit_gear_pitch("spur_gear()",pitch,circ_pitch,diam_pitch,mod)
+	PA = _inherit_gear_pa(pressure_angle)
+	helical = _inherit_gear_helical(helical,named_call_parameter(invert,=,(!internal)))
+	thickness = _inherit_gear_thickness(thickness)
+	profile_shift = auto_profile_shift(teeth,PA,helical,named_call_parameter(profile_shift,=,profile_shift))
+	pr = pitch_radius(circ_pitch,teeth,helical)
+	or = outer_radius(circ_pitch,teeth,named_call_parameter(helical,=,helical),named_call_parameter(profile_shift,=,profile_shift),named_call_parameter(internal,=,internal),named_call_parameter(shorten,=,shorten))
+	rr = _root_radius(circ_pitch,teeth,clearance,named_call_parameter(profile_shift,=,profile_shift),named_call_parameter(internal,=,internal))
+	anchor_rad = ((rr) if (((or) if (((pr) if ((atype == "pitch")) else ((atype == "tip")))) else ((atype == "root")))) else (assert(false,"atype must be one of \"root\", \"tip\" or \"pitch\"")))
+	circum = ((2.0 * PI) * pr)
+	twist = (((360.0 * thickness) * tan(helical)) / circum)
+	slices = default(slices,ceil((((twist / 360.0) * segs(pr)) + 1.0)))
+	rgn = spur_gear2d(named_call_parameter(circ_pitch,=,circ_pitch),named_call_parameter(teeth,=,teeth),named_call_parameter(pressure_angle,=,PA),named_call_parameter(hide,=,hide),named_call_parameter(helical,=,helical),named_call_parameter(clearance,=,clearance),named_call_parameter(backlash,=,backlash),named_call_parameter(internal,=,internal),named_call_parameter(shorten,=,shorten),named_call_parameter(profile_shift,=,profile_shift),named_call_parameter(shaft_diam,=,shaft_diam))
+	rvnf = ((zrot((twist / 2.0),named_call_parameter(p,=,linear_sweep(rgn,named_call_parameter(height,=,thickness),named_call_parameter(twist,=,twist),named_call_parameter(slices,=,slices),named_call_parameter(center,=,true))))) if (herringbone) else (['wall_vnf = linear_sweep(rgn,named_call_parameter(height,=,(thickness / 2.0)),named_call_parameter(twist,=,(twist / 2.0)),named_call_parameter(slices,=,ceil((slices / 2.0))),named_call_parameter(center,=,false),named_call_parameter(caps,=,false))', 'cap_vnf = vnf_from_region(rgn,named_call_parameter(transform,=,(up((thickness / 2.0)) * zrot((twist / 2.0)))))', 'vnf_join(list_stuff(tuple([,opt_expression_list(expression_list(expression_list(expression_list(expression_list(wall_vnf),None,zflip(named_call_parameter(p,=,wall_vnf))),None,cap_vnf),None,zflip(named_call_parameter(p,=,cap_vnf))),None),])))']))
+	vnf = zrot(gear_spin,named_call_parameter(p,=,rvnf))
+	ret = reorient(anchor,spin,orient,named_call_parameter(h,=,thickness),named_call_parameter(r,=,anchor_rad),named_call_parameter(p,=,vnf))
+	return ret
